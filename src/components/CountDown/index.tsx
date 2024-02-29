@@ -1,13 +1,18 @@
 import { CountDownContainer, Separator } from './styles'
 
-export function CountDown() {
+interface CountDownProps {
+  minutes: string
+  secounds: string
+}
+
+export function CountDown({ minutes, secounds }: CountDownProps) {
   return (
     <CountDownContainer>
-      <span>0</span>
-      <span>0</span>
+      <span>{minutes[0]}</span>
+      <span>{minutes[1]}</span>
       <Separator>:</Separator>
-      <span>0</span>
-      <span>0</span>
+      <span>{secounds[0]}</span>
+      <span>{secounds[1]}</span>
     </CountDownContainer>
   )
 }
