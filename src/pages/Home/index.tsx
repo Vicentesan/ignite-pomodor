@@ -38,11 +38,14 @@ export function Home() {
     resolver: zodResolver(newCycleFormSchema),
     defaultValues: {
       task: '',
-      minutesAmount: 0,
+      minutesAmount: undefined,
     },
   })
 
   const activeCycle = cycles.find((c) => c.id === activeCycleId)
+  const cycleMinutesAmountInSecound = activeCycle
+    ? activeCycle.minutesAmount * 60
+    : 0
 
   useEffect(() => {
     let interval: number
@@ -51,6 +54,28 @@ export function Home() {
       interval = setInterval(() => {
         const now = new Date()
         const diff = differenceInSeconds(now, activeCycle.startedAt)
+
+        if (diff >= cycleMinutesAmountInSecound) {
+          setCycles((state) =>
+            state.map((c) => {
+              if (c.id === activeCycle.id) {
+                return {
+                  ...c,
+                  status: 'finished',
+                }
+              }
+
+              return c
+            }),
+          )
+          setActiveCycleId(null)
+          document.title = 'Ignite Timer'
+
+          clearInterval(interval)
+
+          return
+        }
+
         setAmountSecoundsPassed(diff)
       }, 1000)
     }
@@ -58,7 +83,7 @@ export function Home() {
     return () => {
       clearInterval(interval)
     }
-  }, [activeCycle])
+  }, [activeCycle, cycleMinutesAmountInSecound])
 
   function handleCreateNewCicle(data: NewCycleFormSchema) {
     const newCycle: Cycle = {
@@ -78,26 +103,24 @@ export function Home() {
 
   function handleAbortCycle() {
     if (activeCycle) {
-      const updatedCycles: Cycle[] = cycles.map((c) => {
-        if (c.id === activeCycle.id) {
-          return {
-            ...c,
-            status: 'aborted',
+      setCycles((state) =>
+        state.map((c) => {
+          if (c.id === activeCycle.id) {
+            return {
+              ...c,
+              status: 'aborted',
+            }
           }
-        }
 
-        return c
-      })
+          return c
+        }),
+      )
 
-      setCycles(updatedCycles)
       setActiveCycleId(null)
       document.title = 'Ignite Timer'
     }
   }
 
-  const cycleMinutesAmountInSecound = activeCycle
-    ? activeCycle.minutesAmount * 60
-    : 0
   const currentSecounds = activeCycle
     ? cycleMinutesAmountInSecound - amountSecoundsPassed
     : 0
