@@ -5,7 +5,10 @@ import { Timer, Scroll } from 'phosphor-react'
 export function Header() {
   return (
     <HeaderContainer>
-      <img src="/ignite-logo.svg" alt="Ignite Logo" />
+      <NavLink to="/" title="Home">
+        <img src="/ignite-logo.svg" alt="Ignite Logo" />
+      </NavLink>
+
       <nav>
         <NavLink to="/" title="Timer">
           <Timer size={24} />
