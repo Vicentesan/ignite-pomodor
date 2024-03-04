@@ -1,3 +1,5 @@
+import { produce } from 'immer'
+
 import { Cycle } from '../../contexts/CyclesContext'
 import { ActionTypes } from './actions'
 
@@ -13,39 +15,40 @@ export function CyclesReducer(state: CyclesState, action: any): CyclesState {
 
   switch (action.type) {
     case ActionTypes.CREATE_NEW_CYCLE:
-      return {
-        ...state,
-        cycles: [...state.cycles, action.payload.newCycle],
-        activeCycleId: action.payload.newCycle.id,
-      }
-    case ActionTypes.MARK_CYCLE_AS_FINISHED:
-      return {
-        ...state,
-        cycles: state.cycles.map((c: Cycle) => {
-          if (c.id === action.payload.activeCycleId) {
-            return {
-              ...c,
-              status: 'finished',
-            }
-          }
-          return c
-        }),
-        activeCycleId: null,
-      }
-    case ActionTypes.ABORT_CYCLE:
-      return {
-        ...state,
-        cycles: state.cycles.map((c: Cycle) => {
-          if (c.id === action.payload.activeCycleId) {
-            return {
-              ...c,
-              status: 'aborted',
-            }
-          }
-          return c
-        }),
-        activeCycleId: null,
-      }
+      // return {
+      //   ...state,
+      //   cycles: [...state.cycles, action.payload.newCycle],
+      //   activeCycleId: action.payload.newCycle.id,
+      // }
+
+      return produce(state, (draft) => {
+        draft.cycles.push(action.payload.newCycle)
+        draft.activeCycleId = action.payload.newCycle.id
+      })
+    case ActionTypes.MARK_CYCLE_AS_FINISHED: {
+      const currentCycleIndex = state.cycles.findIndex(
+        (c) => c.id === state.activeCycleId,
+      )
+
+      if (currentCycleIndex < 0) return state
+
+      return produce(state, (draft) => {
+        draft.cycles[currentCycleIndex].status = 'finished'
+        draft.activeCycleId = null
+      })
+    }
+    case ActionTypes.ABORT_CYCLE: {
+      const currentCycleIndex = state.cycles.findIndex(
+        (c) => c.id === state.activeCycleId,
+      )
+
+      if (currentCycleIndex < 0) return state
+
+      return produce(state, (draft) => {
+        draft.cycles[currentCycleIndex].status = 'aborted'
+        draft.activeCycleId = null
+      })
+    }
     default:
       return state
   }
