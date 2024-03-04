@@ -1,10 +1,11 @@
-import { createContext, useReducer, useState } from 'react'
+import { createContext, useEffect, useReducer, useState } from 'react'
 import { CyclesReducer } from '../reducers/cycles/reducer'
 import {
   aborCycleAction,
   addNewCycleAction,
   markCycleAsFinishedAction,
 } from '../reducers/cycles/actions'
+import { differenceInSeconds } from 'date-fns'
 
 export interface Cycle {
   id: string
@@ -45,16 +46,40 @@ export function CyclesContextProvider({
   children: React.ReactNode
 }) {
   // const [cycles, setCycles] = useState<Cycle[]>([])
-  const [cyclesState, dispatch] = useReducer(CyclesReducer, {
-    cycles: [],
-    activeCycleId: null,
-  })
+  const [cyclesState, dispatch] = useReducer(
+    CyclesReducer,
+    {
+      cycles: [],
+      activeCycleId: null,
+    },
+    () => {
+      const storedStateAsJSON = localStorage.getItem(
+        '@ignite-pomodor:cycles-state-1.0.0',
+      )
 
-  const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(0)
+      if (!storedStateAsJSON) return { cycles: [], activeCycleId: null }
+
+      return JSON.parse(storedStateAsJSON)
+    },
+  )
 
   const { cycles, activeCycleId } = cyclesState
-
   const activeCycle = cycles.find((c) => c.id === activeCycleId)
+
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(() => {
+    if (activeCycle) {
+      const now = new Date()
+      return differenceInSeconds(now, new Date(activeCycle.startedAt))
+    }
+
+    return 0
+  })
+
+  useEffect(() => {
+    const stateJSON = JSON.stringify(cyclesState)
+
+    localStorage.setItem('@ignite-pomodor:cycles-state-1.0.0', stateJSON) // a cool trick is to use a the application name in the local storage, also its cool to versonize the system to manage state changes
+  }, [cyclesState])
 
   function markCurrentCycleAsFinished() {
     if (!activeCycle || !activeCycleId) return

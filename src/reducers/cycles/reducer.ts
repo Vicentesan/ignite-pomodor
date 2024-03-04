@@ -10,9 +10,6 @@ interface CyclesState {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function CyclesReducer(state: CyclesState, action: any): CyclesState {
-  if (!action.payload.activeCycleId || !action.payload.newCycle)
-    throw new Error('Action payload is missing data.')
-
   switch (action.type) {
     case ActionTypes.CREATE_NEW_CYCLE:
       // return {
