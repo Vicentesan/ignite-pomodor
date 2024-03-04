@@ -52,12 +52,12 @@ export function CyclesContextProvider({
       cycles: [],
       activeCycleId: null,
     },
-    () => {
+    (initialState) => {
       const storedStateAsJSON = localStorage.getItem(
         '@ignite-pomodor:cycles-state-1.0.0',
       )
 
-      if (!storedStateAsJSON) return { cycles: [], activeCycleId: null }
+      if (!storedStateAsJSON) return initialState
 
       return JSON.parse(storedStateAsJSON)
     },
