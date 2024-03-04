@@ -1,4 +1,6 @@
-import { createContext, useState } from 'react'
+import { createContext, useReducer, useState } from 'react'
+import { CyclesReducer } from '../reducers/cycles/reducer'
+import { aborCycleAction, addNewCycleAction } from '../reducers/cycles/actions'
 
 export interface Cycle {
   id: string
@@ -38,27 +40,21 @@ export function CyclesContextProvider({
 }: {
   children: React.ReactNode
 }) {
-  const [cycles, setCycles] = useState<Cycle[]>([])
-  const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+  // const [cycles, setCycles] = useState<Cycle[]>([])
+  const [cyclesState, dispatch] = useReducer(CyclesReducer, {
+    cycles: [],
+    activeCycleId: null,
+  })
+
   const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(0)
+
+  const { cycles, activeCycleId } = cyclesState
 
   const activeCycle = cycles.find((c) => c.id === activeCycleId)
 
   function markCurrentCycleAsFinished() {
-    setCycles((state) =>
-      state.map((c) => {
-        if (c.id === activeCycleId) {
-          return {
-            ...c,
-            status: 'finished',
-          }
-        }
-
-        return c
-      }),
-    )
+    dispatch(activeCycleId ?? activeCycle.id)
     setAmountSecondsPassed(0)
-    setActiveCycleId(null)
   }
 
   function setSecondsPassed(seconds: number) {
@@ -75,27 +71,15 @@ export function CyclesContextProvider({
     }
 
     if (activeCycle) markCurrentCycleAsFinished()
-    setCycles((state) => [...state, newCycle])
-    setActiveCycleId(newCycle.id)
+    dispatch(addNewCycleAction(newCycle))
+
     setAmountSecondsPassed(0)
   }
 
   function abortCycle() {
     if (activeCycle) {
-      setCycles((state) =>
-        state.map((c) => {
-          if (c.id === activeCycle.id) {
-            return {
-              ...c,
-              status: 'aborted',
-            }
-          }
+      dispatch(aborCycleAction(activeCycleId ?? activeCycle.id))
 
-          return c
-        }),
-      )
-
-      setActiveCycleId(null)
       document.title = 'Ignite Timer'
     }
   }
