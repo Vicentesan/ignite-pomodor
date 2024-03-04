@@ -6,7 +6,10 @@ interface CyclesState {
   activeCycleId: string | null
 }
 
-export function CyclesReducer(state: CyclesState, action) {
+export function CyclesReducer(state: CyclesState, action): CyclesState {
+  if (!action.payload.activeCycleId || !action.payload.newCycle)
+    throw new Error('Action payload is missing data.')
+
   switch (action.type) {
     case ActionTypes.CREATE_NEW_CYCLE:
       return {
@@ -17,7 +20,7 @@ export function CyclesReducer(state: CyclesState, action) {
     case ActionTypes.MARK_CYCLE_AS_FINISHED:
       return {
         ...state,
-        cycles: state.cycles.map((c) => {
+        cycles: state.cycles.map((c: Cycle) => {
           if (c.id === action.payload.activeCycleId) {
             return {
               ...c,
@@ -31,7 +34,7 @@ export function CyclesReducer(state: CyclesState, action) {
     case ActionTypes.ABORT_CYCLE:
       return {
         ...state,
-        cycles: state.cycles.map((c) => {
+        cycles: state.cycles.map((c: Cycle) => {
           if (c.id === action.payload.activeCycleId) {
             return {
               ...c,

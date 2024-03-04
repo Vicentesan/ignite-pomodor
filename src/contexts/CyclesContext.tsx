@@ -1,6 +1,10 @@
 import { createContext, useReducer, useState } from 'react'
 import { CyclesReducer } from '../reducers/cycles/reducer'
-import { aborCycleAction, addNewCycleAction } from '../reducers/cycles/actions'
+import {
+  aborCycleAction,
+  addNewCycleAction,
+  markCycleAsFinishedAction,
+} from '../reducers/cycles/actions'
 
 export interface Cycle {
   id: string
@@ -53,7 +57,9 @@ export function CyclesContextProvider({
   const activeCycle = cycles.find((c) => c.id === activeCycleId)
 
   function markCurrentCycleAsFinished() {
-    dispatch(activeCycleId ?? activeCycle.id)
+    if (!activeCycle || !activeCycleId) return
+
+    dispatch(markCycleAsFinishedAction(activeCycleId ?? activeCycle?.id))
     setAmountSecondsPassed(0)
   }
 
