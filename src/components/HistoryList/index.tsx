@@ -32,7 +32,7 @@ export function HistoryList() {
                 <td>{task}</td>
                 <td>{minutesAmount} minutes</td>
                 <td>
-                  {formatDistanceToNow(startedAt, {
+                  {formatDistanceToNow(new Date(startedAt), {
                     addSuffix: true,
                   })}
                 </td>
