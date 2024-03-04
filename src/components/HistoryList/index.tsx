@@ -1,6 +1,11 @@
+import { useContext } from 'react'
 import { Status, HistoryListContainer } from './styles'
+import { CyclesContext } from '../../contexts/CyclesContext'
+import { formatDistanceToNow } from 'date-fns'
 
 export function HistoryList() {
+  const { cycles } = useContext(CyclesContext)
+
   return (
     <HistoryListContainer>
       <table>
@@ -14,30 +19,33 @@ export function HistoryList() {
         </thead>
 
         <tbody>
-          <tr>
-            <td>Task</td>
-            <td>20 minutes</td>
-            <td>2 weeks ago</td>
-            <td>
-              <Status statusColor="yellow">In Progress</Status>
-            </td>
-          </tr>
-          <tr>
-            <td>Task</td>
-            <td>20 minutes</td>
-            <td>2 weeks ago</td>
-            <td>
-              <Status statusColor="green">Finished</Status>
-            </td>
-          </tr>
-          <tr>
-            <td>Task</td>
-            <td>20 minutes</td>
-            <td>2 weeks ago</td>
-            <td>
-              <Status statusColor="red">Aborted</Status>
-            </td>
-          </tr>
+          {cycles.map(({ id, task, minutesAmount, startedAt, status }) => {
+            const statusColor =
+              status === 'aborted'
+                ? 'red'
+                : status === 'finished'
+                  ? 'green'
+                  : 'yellow'
+
+            return (
+              <tr key={id}>
+                <td>{task}</td>
+                <td>{minutesAmount} minutes</td>
+                <td>
+                  {formatDistanceToNow(startedAt, {
+                    addSuffix: true,
+                  })}
+                </td>
+                <td>
+                  <Status statusColor={statusColor}>
+                    {status === 'in progress'
+                      ? 'In Progress'
+                      : status.charAt(0).toUpperCase() + status.slice(1)}
+                  </Status>
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </HistoryListContainer>

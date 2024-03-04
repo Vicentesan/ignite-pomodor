@@ -20,6 +20,7 @@ interface CyclesContextData {
   abortCycle: () => void
   activeCycle: Cycle | undefined
   amountSecondsPassed: number
+  cycles: Cycle[]
 }
 
 export const CyclesContext = createContext<CyclesContextData>({
@@ -29,6 +30,7 @@ export const CyclesContext = createContext<CyclesContextData>({
   abortCycle: () => {},
   activeCycle: undefined,
   amountSecondsPassed: 0,
+  cycles: [],
 })
 
 export function CyclesContextProvider({
@@ -107,6 +109,7 @@ export function CyclesContextProvider({
         activeCycle,
         amountSecondsPassed,
         abortCycle,
+        cycles,
       }}
     >
       {children}
